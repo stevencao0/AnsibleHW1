@@ -1,0 +1,45 @@
+---
+- hosts: all
+  become: true
+
+
+  tasks:
+  - name: "Installing Apache "
+    apt: name={{item}} 
+    with_items:
+    - apache2
+
+  - name: Setting address for ansibletest
+    lineinfile:
+      dest: /etc/hosts
+      line: "0.0.0.0	ansibletest.com"
+
+  - name: enable mod rewrite module
+    apache2_module: name=rewrite state=present
+    notify:
+    - restart apache2
+
+  - name: Replacing default page with ansibletest page
+    template: src=index.html dest=/var/www/html/index.html
+
+  - name: apache2 to listen on port 80
+    lineinfile: dest=/etc/apache2/ports.conf regexp="^Listen " line="Listen 80" state=present
+
+  - name: Creating virtual host config
+    template: src=../ansibletest.conf dest=/etc/apache2/sites-available/ansibletest.conf
+
+  - name: Enable ansibletest
+    command: a2ensite ansibletest.conf
+
+  - name: Disable default page
+    command: a2dissite 000-default.conf
+    notify:
+    - restart apache2
+
+
+
+  handlers:
+    - name: restart apache2
+      service: name=apache2 state=restarted
+ 
+
