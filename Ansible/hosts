@@ -1,2 +1,2 @@
-ubuntu     ansible_connection=ssh  ansible_password=1234    ansible_user=scao
+ubuntu     ansible_connection=ssh  ansible_password=1234  ansible_ssh_host=127.0.1.1  ansible_user=scao
 
